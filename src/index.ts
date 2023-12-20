@@ -6,7 +6,7 @@ import { Server } from "socket.io";
 import { createServer } from "http";
 
 dotenv.config();
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 
 const app: Express = express();
 app.use(bodyParser.json());
