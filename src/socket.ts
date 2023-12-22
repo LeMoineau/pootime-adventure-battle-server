@@ -1,11 +1,11 @@
-import { Server } from "socket.io";
 import { SocketEvent } from "./types/SocketEvent";
-import { Room } from "./types/Room";
+import { Room, RoomId } from "./types/Room";
 import { MathUtils } from "./utils/math-utils";
-import cors from "cors";
-import { httpServer } from ".";
+import { RoomUtils } from "./utils/room-utils";
+import { PlayerStyle } from "./types/PlayerStyle";
+import { PlayerStats } from "./types/PlayerStats";
 
-const rooms: Room[] = [];
+export const rooms: Room[] = [];
 
 export default function onConnection(socket: any) {
   console.log(`#${socket.id} connect`);
@@ -15,8 +15,10 @@ export default function onConnection(socket: any) {
       owner: socket.id,
       id: MathUtils.generateRoomId(),
       players: [socket.id],
+      battleState: {},
     };
     rooms.push(room);
+    socket.data.roomId = room.id;
     socket.emit(SocketEvent.ROOM_CREATED, room);
     console.log(`#${socket.id} create the room #${room.id}`, room);
   });
@@ -25,6 +27,7 @@ export default function onConnection(socket: any) {
     const room = rooms.find((r) => r.id === roomId);
     if (room && room.owner !== socket.id) {
       room.players.push(socket.id);
+      socket.data.roomId = roomId;
       socket.emit(SocketEvent.FIND_THE_ROOM, room);
       socket.to(room.owner).emit(SocketEvent.PLAYER_JOIN_YOUR_ROOM, room);
       console.log(`#${socket.id} join the room #${room.id}`, room);
@@ -32,6 +35,28 @@ export default function onConnection(socket: any) {
       socket.emit(SocketEvent.NOT_FIND_THE_ROOM);
     }
   });
+
+  socket.on(
+    SocketEvent.SEND_PLAYER_INFOS,
+    (style: PlayerStyle, stats: PlayerStats) => {
+      RoomUtils.ifRoomExist(socket.data.roomId, (room) => {
+        room.battleState[socket.id] = {
+          style: style,
+          stats: stats,
+        };
+        RoomUtils.emitToOtherPlayer(
+          socket,
+          room,
+          SocketEvent.SEND_PLAYER_INFOS,
+          style,
+          stats
+        );
+        if (Object.keys(room.battleState).length >= 2) {
+          RoomUtils.emitToAllPlayers(socket, room, SocketEvent.BATTLE_BEGIN);
+        }
+      });
+    }
+  );
 
   socket.on(SocketEvent.DISCONNECT, () => {
     const roomIndex = rooms.findIndex((r) => r.owner === socket.id);

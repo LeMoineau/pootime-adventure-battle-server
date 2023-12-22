@@ -7,4 +7,6 @@ export const SocketEvent = {
   NOT_FIND_THE_ROOM: "not-find-the-room",
   PLAYER_JOIN_YOUR_ROOM: "player-join-your-room",
   DISCONNECT: "disconnect",
+  SEND_PLAYER_INFOS: "send-player-infos",
+  BATTLE_BEGIN: "battle-begin",
 };
