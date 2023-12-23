@@ -1,3 +1,4 @@
+import { PlayerState } from "./PlayerState";
 import { PlayerStats } from "./PlayerStats";
 import { PlayerStyle } from "./PlayerStyle";
 
@@ -9,6 +10,10 @@ export interface Room {
   owner: SocketId;
   players: SocketId[];
   battleState: {
-    [socketId: SocketId]: { style: PlayerStyle; stats: PlayerStats };
+    [socketId: SocketId]: {
+      style: PlayerStyle;
+      stats: PlayerStats;
+      currentState: PlayerState;
+    };
   };
 }

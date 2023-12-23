@@ -8,5 +8,10 @@ export const SocketEvent = {
   PLAYER_JOIN_YOUR_ROOM: "player-join-your-room",
   DISCONNECT: "disconnect",
   SEND_PLAYER_INFOS: "send-player-infos",
+  ROOM_READY: "room-ready",
   BATTLE_BEGIN: "battle-begin",
+  HIT: "hit",
+  SPELL: "spell",
+  UPDATE_BATTLE_STATE: "update-battle-state",
+  BATTLE_FINISH: "battle-finish",
 };

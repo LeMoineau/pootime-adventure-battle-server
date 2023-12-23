@@ -1,9 +1,13 @@
 import { SocketEvent } from "./types/SocketEvent";
-import { Room, RoomId } from "./types/Room";
+import { Room } from "./types/Room";
 import { MathUtils } from "./utils/math-utils";
 import { RoomUtils } from "./utils/room-utils";
 import { PlayerStyle } from "./types/PlayerStyle";
 import { PlayerStats } from "./types/PlayerStats";
+import { DefaultValues } from "./config/DefaultValues";
+import { BattleUpdatePayload } from "./types/BattleUpdatePayload";
+import { UltiDetails } from "./types/UltiDetails";
+import { BattleController } from "./battle-controller";
 
 export const rooms: Room[] = [];
 
@@ -43,20 +47,74 @@ export default function onConnection(socket: any) {
         room.battleState[socket.id] = {
           style: style,
           stats: stats,
+          currentState: {
+            currentPv: stats.pv,
+            currentMana: 0,
+          },
         };
-        RoomUtils.emitToOtherPlayer(
-          socket,
-          room,
-          SocketEvent.SEND_PLAYER_INFOS,
-          style,
-          stats
-        );
         if (Object.keys(room.battleState).length >= 2) {
-          RoomUtils.emitToAllPlayers(socket, room, SocketEvent.BATTLE_BEGIN);
+          RoomUtils.emitToAllPlayers(
+            socket,
+            room,
+            SocketEvent.ROOM_READY,
+            room
+          );
+          console.log(`room #${room.id} ready, room: `, room);
+          setTimeout(() => {
+            RoomUtils.emitToAllPlayers(socket, room, SocketEvent.BATTLE_BEGIN);
+            console.log(`battle begin in room #${room.id}`);
+          }, DefaultValues.TimeoutBattleBegin);
         }
       });
     }
   );
+
+  socket.on(SocketEvent.HIT, () => {
+    RoomUtils.ifRoomExist(socket.data.roomId, (room) => {
+      const advSocketId = RoomUtils.getOtherPlayer(socket.id, room);
+      RoomUtils.removePvFromHitFromPlayer(socket.id, advSocketId, room);
+      RoomUtils.addManaToPlayer(socket.id, advSocketId, room);
+      RoomUtils.emitUpdatePvAndMana(socket, room, advSocketId, socket.id);
+      BattleController.checkVictoryState(socket, room);
+    });
+  });
+
+  socket.on(SocketEvent.SPELL, (ulti: UltiDetails) => {
+    RoomUtils.ifRoomExist(socket.data.roomId, (room) => {
+      if (ulti.mana <= RoomUtils.getPlayerState(socket.id, room).currentMana) {
+        const advSocketId = RoomUtils.getOtherPlayer(socket.id, room);
+        RoomUtils.removePvFromSpellFromPlayer(
+          socket.id,
+          advSocketId,
+          ulti,
+          room
+        );
+        RoomUtils.removeManaToPlayer(socket.id, room, ulti.mana);
+        RoomUtils.emitToAllPlayers(
+          socket,
+          room,
+          SocketEvent.UPDATE_BATTLE_STATE,
+          [
+            {
+              target: advSocketId,
+              update: {
+                currentPv: RoomUtils.getPlayerState(advSocketId, room)
+                  .currentPv,
+              },
+            },
+            {
+              target: socket.id,
+              update: {
+                currentMana: RoomUtils.getPlayerState(socket.id, room)
+                  .currentMana,
+              },
+            },
+          ] as BattleUpdatePayload
+        );
+        BattleController.checkVictoryState(socket, room);
+      }
+    });
+  });
 
   socket.on(SocketEvent.DISCONNECT, () => {
     const roomIndex = rooms.findIndex((r) => r.owner === socket.id);
