@@ -1,5 +1,5 @@
 import { SocketEvent } from "./types/SocketEvent";
-import { Room } from "./types/Room";
+import { Room, SocketId } from "./types/Room";
 import { MathUtils } from "./utils/math-utils";
 import { RoomUtils } from "./utils/room-utils";
 import { PlayerStyle } from "./types/PlayerStyle";
@@ -8,10 +8,12 @@ import { DefaultValues } from "./config/DefaultValues";
 import { BattleUpdatePayload } from "./types/BattleUpdatePayload";
 import { UltiDetails } from "./types/UltiDetails";
 import { BattleController } from "./battle-controller";
+import { Socket } from "socket.io";
 
 export const rooms: Room[] = [];
+export const queue: Socket[] = [];
 
-export default function onConnection(socket: any) {
+export default function onConnection(socket: Socket) {
   console.log(`#${socket.id} connect`);
 
   socket.on(SocketEvent.CREATE_A_ROOM, () => {
@@ -59,7 +61,6 @@ export default function onConnection(socket: any) {
             SocketEvent.ROOM_READY,
             room
           );
-          console.log(`room #${room.id} ready, room: `, room);
           setTimeout(() => {
             RoomUtils.emitToAllPlayers(socket, room, SocketEvent.BATTLE_BEGIN);
             console.log(`battle begin in room #${room.id}`);
@@ -116,11 +117,36 @@ export default function onConnection(socket: any) {
     });
   });
 
+  socket.on(SocketEvent.JOIN_THE_QUEUE, () => {
+    if (queue.length >= 1) {
+      const adv = queue[0];
+      queue.splice(0, 1);
+      const room = {
+        id: MathUtils.generateRoomId(),
+        owner: socket.id,
+        players: [socket.id, adv.id],
+        battleState: {},
+      };
+      rooms.push(room);
+      socket.data.roomId = room.id;
+      adv.data.roomId = room.id;
+      socket.emit(SocketEvent.FIND_THE_ROOM, room);
+      adv.emit(SocketEvent.FIND_THE_ROOM, room);
+    } else if (queue.findIndex((s) => socket.id === s.id) === -1) {
+      queue.push(socket);
+    }
+  });
+
   socket.on(SocketEvent.DISCONNECT, () => {
     const roomIndex = rooms.findIndex((r) => r.owner === socket.id);
     if (roomIndex !== -1) {
       console.log(`destroying room #${rooms[roomIndex].id}`);
       rooms.splice(roomIndex, 1);
+    }
+    const queueIndex = queue.findIndex((s) => s.id === socket.id);
+    if (queueIndex !== -1) {
+      console.log(`removing from queue`);
+      queue.splice(queueIndex, 1);
     }
     console.log(`#${socket.id} disconnect`);
   });

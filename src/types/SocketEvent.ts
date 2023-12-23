@@ -14,4 +14,5 @@ export const SocketEvent = {
   SPELL: "spell",
   UPDATE_BATTLE_STATE: "update-battle-state",
   BATTLE_FINISH: "battle-finish",
+  JOIN_THE_QUEUE: "join-the-queue",
 };
