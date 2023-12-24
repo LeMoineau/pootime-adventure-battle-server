@@ -16,4 +16,5 @@ export interface Room {
       currentState: PlayerState;
     };
   };
+  battleFinish?: boolean
 }

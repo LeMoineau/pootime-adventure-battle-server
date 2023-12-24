@@ -8,7 +8,11 @@ import { MathUtils } from "./utils/math-utils";
 export namespace BattleController {
   export function checkVictoryState(socket: Socket, room: Room) {
     for (let p of room.players) {
-      if (RoomUtils.getPlayerState(p, room).currentPv <= 0) {
+      if (
+        RoomUtils.getPlayerState(p, room).currentPv <= 0 &&
+        !room.battleFinish
+      ) {
+        room.battleFinish = true;
         const winnerSocketId = RoomUtils.getOtherPlayer(p, room);
         const winnerStats = RoomUtils.getPlayerStats(winnerSocketId, room);
         const loserStats = RoomUtils.getPlayerStats(p, room);

@@ -9,6 +9,7 @@ import { BattleUpdatePayload } from "./types/BattleUpdatePayload";
 import { UltiDetails } from "./types/UltiDetails";
 import { BattleController } from "./battle-controller";
 import { Socket } from "socket.io";
+import { ArrayUtils } from "./utils/array-utils";
 
 export const rooms: Room[] = [];
 export const queue: Socket[] = [];
@@ -54,7 +55,9 @@ export default function onConnection(socket: Socket) {
             currentMana: 0,
           },
         };
-        if (Object.keys(room.battleState).length >= 2) {
+        if (
+          ArrayUtils.includesAll(Object.keys(room.battleState), room.players)
+        ) {
           RoomUtils.emitToAllPlayers(
             socket,
             room,
