@@ -6,6 +6,7 @@ const math_utils_1 = require("./utils/math-utils");
 const room_utils_1 = require("./utils/room-utils");
 const DefaultValues_1 = require("./config/DefaultValues");
 const battle_controller_1 = require("./battle-controller");
+const array_utils_1 = require("./utils/array-utils");
 exports.rooms = [];
 exports.queue = [];
 function onConnection(socket) {
@@ -45,7 +46,7 @@ function onConnection(socket) {
                     currentMana: 0,
                 },
             };
-            if (Object.keys(room.battleState).length >= 2) {
+            if (array_utils_1.ArrayUtils.includesAll(Object.keys(room.battleState), room.players)) {
                 room_utils_1.RoomUtils.emitToAllPlayers(socket, room, SocketEvent_1.SocketEvent.ROOM_READY, room);
                 setTimeout(() => {
                     room_utils_1.RoomUtils.emitToAllPlayers(socket, room, SocketEvent_1.SocketEvent.BATTLE_BEGIN);

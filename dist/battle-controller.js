@@ -8,7 +8,9 @@ var BattleController;
 (function (BattleController) {
     function checkVictoryState(socket, room) {
         for (let p of room.players) {
-            if (room_utils_1.RoomUtils.getPlayerState(p, room).currentPv <= 0) {
+            if (room_utils_1.RoomUtils.getPlayerState(p, room).currentPv <= 0 &&
+                !room.battleFinish) {
+                room.battleFinish = true;
                 const winnerSocketId = room_utils_1.RoomUtils.getOtherPlayer(p, room);
                 const winnerStats = room_utils_1.RoomUtils.getPlayerStats(winnerSocketId, room);
                 const loserStats = room_utils_1.RoomUtils.getPlayerStats(p, room);

@@ -56,8 +56,10 @@ var RoomUtils;
     RoomUtils.removePvFromSpellFromPlayer = removePvFromSpellFromPlayer;
     function addManaToPlayer(hitterSocketId, victimSocketId, room) {
         const gainMana = battle_utils_1.BattleUtils.calculateGainMana(RoomUtils.getPlayerStats(hitterSocketId, room), RoomUtils.getPlayerState(hitterSocketId, room), RoomUtils.getPlayerStats(victimSocketId, room), RoomUtils.getPlayerState(victimSocketId, room));
-        setKeyPlayerState(hitterSocketId, room, "currentMana", (getPlayerState(hitterSocketId, room).currentMana + gainMana) %
-            RoomUtils.getPlayerStats(hitterSocketId, room).mana);
+        const newValueMana = getPlayerState(hitterSocketId, room).currentMana + gainMana;
+        setKeyPlayerState(hitterSocketId, room, "currentMana", newValueMana >= RoomUtils.getPlayerStats(hitterSocketId, room).mana
+            ? RoomUtils.getPlayerStats(hitterSocketId, room).mana
+            : newValueMana);
     }
     RoomUtils.addManaToPlayer = addManaToPlayer;
     function removeManaToPlayer(targetSocketId, room, amount) {
