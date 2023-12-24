@@ -113,12 +113,15 @@ export namespace RoomUtils {
       RoomUtils.getPlayerStats(victimSocketId, room),
       RoomUtils.getPlayerState(victimSocketId, room)
     );
+    const newValueMana =
+      getPlayerState(hitterSocketId, room).currentMana + gainMana;
     setKeyPlayerState(
       hitterSocketId,
       room,
       "currentMana",
-      (getPlayerState(hitterSocketId, room).currentMana + gainMana) %
-        RoomUtils.getPlayerStats(hitterSocketId, room).mana
+      newValueMana >= RoomUtils.getPlayerStats(hitterSocketId, room).mana
+        ? RoomUtils.getPlayerStats(hitterSocketId, room).mana
+        : newValueMana
     );
   }
 
