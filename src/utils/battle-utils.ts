@@ -28,6 +28,8 @@ export namespace BattleUtils {
     victimStats: PlayerStats,
     victimState: PlayerState
   ): number {
-    return ulti.damage ? ulti.damage / victimStats.resMana : 0;
+    return ulti.damage
+      ? ulti.damage / (victimStats.resMana === 0 ? 1 : victimStats.resMana)
+      : 0;
   }
 }
