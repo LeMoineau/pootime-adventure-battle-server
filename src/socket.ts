@@ -151,6 +151,7 @@ export default function onConnection(socket: Socket) {
       console.log(`removing from queue`);
       queue.splice(queueIndex, 1);
     }
+    //TODO: rajouter cas si socket déjà dans une room commencé -> détruire la room et donner victoire à l'autre
     console.log(`#${socket.id} disconnect`);
   });
 }

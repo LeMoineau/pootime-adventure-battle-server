@@ -16,16 +16,25 @@ export namespace BattleController {
         const winnerSocketId = RoomUtils.getOtherPlayer(p, room);
         const winnerStats = RoomUtils.getPlayerStats(winnerSocketId, room);
         const loserStats = RoomUtils.getPlayerStats(p, room);
-        RoomUtils.emitToAllPlayers(socket, room, SocketEvent.BATTLE_FINISH, {
-          [winnerSocketId]: {
-            victoryState: "winner",
-            rewards: MathUtils.calculateRewardsWinner(winnerStats, loserStats),
-          },
-          [p]: {
-            victoryState: "loser",
-            rewards: MathUtils.calculateRewardsLoser(winnerStats, loserStats),
-          },
-        } as BattleEnding);
+        RoomUtils.emitToAllPlayers(
+          socket,
+          room,
+          SocketEvent.BATTLE_FINISH,
+          {
+            [winnerSocketId]: {
+              victoryState: "winner",
+              rewards: MathUtils.calculateRewardsWinner(
+                winnerStats,
+                loserStats
+              ),
+            },
+            [p]: {
+              victoryState: "loser",
+              rewards: MathUtils.calculateRewardsLoser(winnerStats, loserStats),
+            },
+          } as BattleEnding,
+          room
+        );
       }
     }
   }

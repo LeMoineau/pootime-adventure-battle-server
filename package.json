@@ -1,7 +1,7 @@
 {
-  "name": "mailsender-api",
+  "name": "pootime-adventure-battle-server",
   "version": "1.0.0",
-  "description": "api to send mail",
+  "description": "socket server for pootime adventure battles",
   "main": "index.js",
   "scripts": {
     "build": "rimraf dist && tsc",
