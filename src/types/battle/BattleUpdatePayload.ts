@@ -1,4 +1,4 @@
-import { SocketId } from "./Room";
+import { SocketId } from "../Identifier";
 
 export interface BattleUpdate {
   target: SocketId;

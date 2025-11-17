@@ -1,5 +1,5 @@
-import { BattleRewards } from "../types/BattleEnding";
-import { PlayerStats } from "../types/PlayerStats";
+import { BattleRewards } from "../types/battle/BattleEnding";
+import { PlayerStats } from "../types/player/PlayerStats";
 
 export namespace MathUtils {
   export function generateRoomId() {
