@@ -6,15 +6,10 @@ import { PlayerStats } from "../types/player/PlayerStats";
 import { PlayerStyle } from "../types/player/PlayerStyle";
 import { UltiDetails } from "../types/player/UltiDetails";
 
-// export const SocketEvent = {
-//   CONNECTION: "connection",
-//   DISCONNECT: "disconnect",
-// };
-
 export interface ClientToServerEvents {
   "create-a-room": () => void;
   "join-a-room": (id: RoomId) => void;
-  "join-the-queue": () => void;
+  "join-the-queue": (pooTrophees: number) => void;
   "send-player-infos": (style: PlayerStyle, stats: PlayerStats) => void;
   hit: () => void;
   spell: (ulti: UltiDetails) => void;

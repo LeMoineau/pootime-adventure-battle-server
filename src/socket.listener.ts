@@ -11,14 +11,16 @@ import { Player } from "./types/player/Player.impl";
 import battleService from "./service/battle.service";
 import { UltiDetails } from "./types/player/UltiDetails";
 import { Room } from "./types/room/Room.impl";
-import queueService from "./service/queue.service";
+import { QueueService } from "./service/queue.service";
 import playerController from "./controller/player.controller";
 
 export class SocketListener {
   io: BattleSocketServer;
+  queueService: QueueService;
 
   constructor(httpServer: Server) {
     this.io = new BattleSocketServer(httpServer, { cors: { ...cors() } });
+    this.queueService = new QueueService(this.io);
   }
 
   listen() {
@@ -44,22 +46,23 @@ export class SocketListener {
   }
 
   _listeningJoiningTheQueue(socket: BattleSocket) {
-    socket.on("join-the-queue", () => {
-      const player = playerController.create({ socket });
-      queueService.join(player, (room) => {
-        this.io.to(room.id).emit("find-the-room", room.toDTO());
-      });
+    socket.on("join-the-queue", (pooTrophees) => {
+      const player = playerController.create({ socket, pooTrophees });
+      this.queueService.join(player);
     });
   }
 
   _listeningJoiningARoom(socket: BattleSocket) {
     socket.on("join-a-room", (id: RoomId) => {
-      const r = roomController.get({ id });
-      if (r && !r.contains({ socketId: socket.id })) {
-        r.add(new Player(socket));
-        socket.emit("find-the-room", r.toDTO());
-        socket.to(r.owner.socketId).emit("player-join-your-room", r.toDTO());
-        console.log(`#${socket.id} join the room #${r.id}`, r.toDTO());
+      const player = playerController.create({ socket });
+      const room = roomController.get({ id });
+      if (room && !room.contains({ socketId: socket.id })) {
+        room.add(player);
+        socket.emit("find-the-room", room.toDTO());
+        socket
+          .to(room.owner.socketId)
+          .emit("player-join-your-room", room.toDTO());
+        console.log(`#${socket.id} join the room #${room.id}`, room.toDTO());
       } else {
         socket.emit("not-find-the-room");
       }
@@ -83,8 +86,9 @@ export class SocketListener {
           this.io.to(room.id).emit("room-ready", room.toDTO());
           setTimeout(() => {
             this.io.to(room.id).emit("battle-begin");
+            room.begin();
             console.log(`battle begin in room #${room.id}`);
-          }, DefaultValues.TimeoutBattleBegin);
+          }, DefaultValues.BATTLE_BEGIN_TIMEOUT);
         }
       }
     });
@@ -117,12 +121,12 @@ export class SocketListener {
   _listeningDisconnection(socket: BattleSocket) {
     socket.on("disconnect", () => {
       const room = roomController.remove({ playerId: socket.id });
-      if (room && !room.finish() && room.ready()) {
+      if (room && !room.finished() && room.ready()) {
         this._handleDisconnectDuringBattle(room, socket.id);
       } else {
         playerController.remove({ socketId: socket.id });
       }
-      const player = queueService.remove({ socketId: socket.id });
+      const player = this.queueService.remove({ socketId: socket.id });
       if (player) {
         console.log(`player removed from the queue`);
       }
@@ -146,17 +150,15 @@ export class SocketListener {
         "update-battle-state",
         battleService.generateBattleUpdatePayload(player, adv)
       );
-    if (room.finish()) {
+    if (room.finished()) {
       const winner = room.getWinner();
       if (winner) {
+        room.stop();
         this.io
           .to(room.id)
           .emit(
             "battle-finish",
-            battleService.generateBattleEnding(
-              winner,
-              room.getAdvOf({ socketId: winner.socketId })!
-            ),
+            battleService.generateBattleEnding(room),
             room.toDTO()
           );
         roomController.remove({ id: room.id });

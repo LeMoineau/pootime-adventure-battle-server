@@ -16,12 +16,13 @@ class RoomController {
    * @param owner owner socket id
    * @returns created room
    */
-  create({ owner }: { owner: Player }): Room {
+  create({ owner, ranked }: { owner: Player; ranked?: boolean }): Room {
     const alreadyExistingRoom = this.get({ ownerId: owner.socketId });
     if (alreadyExistingRoom) return alreadyExistingRoom;
     const room = new Room({
       id: MathUtils.generateRoomId(),
       owner,
+      ranked,
     });
     this.rooms.push(room);
     return room;

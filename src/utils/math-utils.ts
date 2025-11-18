@@ -6,6 +6,10 @@ export namespace MathUtils {
     return Math.random().toString(36).toUpperCase().substring(2, 6);
   }
 
+  export function getRandomInt(max: number, min: number = 0) {
+    return Math.floor(Math.random() * (max - min) + min);
+  }
+
   export function calculateRewardsWinner(
     winnerStats: PlayerStats,
     loserStats: PlayerStats

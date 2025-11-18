@@ -2,16 +2,28 @@ import { BattleState } from "../battle/BattleState";
 import { RoomDTO } from "./Room.dto";
 import { RoomId, SocketId } from "../Identifier";
 import { Player } from "../player/Player.impl";
+import { Bot } from "../player/Bot.impl";
 
 export class Room {
   id: RoomId;
   owner: Player;
   players: Player[];
+  ranked: boolean;
+  started?: boolean;
 
-  constructor({ id, owner }: { id: RoomId; owner: Player }) {
+  constructor({
+    id,
+    owner,
+    ranked = false,
+  }: {
+    id: RoomId;
+    owner: Player;
+    ranked?: boolean;
+  }) {
     this.id = id;
     this.owner = owner;
     this.players = [];
+    this.ranked = ranked;
     this.add(owner);
   }
 
@@ -73,7 +85,7 @@ export class Room {
   }
 
   getWinner(): Player | undefined {
-    return this.finish()
+    return this.finished()
       ? this.players.find(
           (p) => p.battleState && p.battleState.currentState.currentPv > 0
         )
@@ -84,7 +96,25 @@ export class Room {
     return this.players.every((p) => p.ready);
   }
 
-  finish() {
+  /**
+   * alert that the battle begin to trigger bot if exists
+   */
+  begin() {
+    for (let p of this.players) {
+      if (p instanceof Bot) p.start();
+    }
+  }
+
+  /**
+   * altert that the battle is finished to trigger bot if exists
+   */
+  stop() {
+    for (let p of this.players) {
+      if (p instanceof Bot) p.stop();
+    }
+  }
+
+  finished() {
     return !!this.players.find((p) => p.died);
   }
 
@@ -94,7 +124,7 @@ export class Room {
       owner: this.ownerId,
       players: this.playerIds,
       battleState: this.battleStateByPlayerId,
-      battleFinish: this.finish(),
+      battleFinish: this.finished(),
     };
   }
 }

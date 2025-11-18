@@ -4,6 +4,10 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import { createServer } from "http";
 import { SocketListener } from "./socket.listener";
+import { BattleSocketServer } from "./types/socket/BattleSocketServer";
+import battleManager from "./manager/battle.manager";
+import roomManager from "./manager/room.manager";
+import routeSockets from "./sockets/routes";
 
 dotenv.config();
 const port = process.env.PORT || 3000;
@@ -13,7 +17,6 @@ app.use(bodyParser.json());
 app.use(cors());
 
 const httpServer = createServer(app);
-const socketListener = new SocketListener(httpServer);
 
 app.get("/", (_: Request, res: Response) => {
   res.send("Express + TypeScript Server");
@@ -23,4 +26,10 @@ httpServer.listen(port, () => {
   console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
 });
 
-socketListener.listen();
+export const io = new BattleSocketServer(httpServer, { cors: { ...cors() } });
+battleManager.use(io);
+roomManager.use(io);
+routeSockets(io);
+
+// const socketListener = new SocketListener(httpServer);
+// socketListener.listen();

@@ -1,0 +1,26 @@
+import { colors } from "./colors";
+
+export const bodyColors = [
+  colors.baseBodyColor,
+  colors.red[300],
+  colors.orange[300],
+  colors.amber[300],
+  colors.yellow[300],
+  colors.lime[300],
+  colors.green[300],
+  colors.emerald[300],
+  colors.teal[300],
+  colors.cyan[300],
+  colors.sky[300],
+  colors.blue[300],
+  colors.indigo[300],
+  colors.violet[300],
+  colors.purple[300],
+  colors.fuchsia[300],
+  colors.pink[300],
+  colors.black,
+  colors.gray[300],
+  colors.stone[300],
+  colors.white,
+  colors.transparent,
+];

@@ -9,10 +9,16 @@ class PlayerController {
     this.players = [];
   }
 
-  create({ socket }: { socket: BattleSocket }): Player {
+  create({
+    socket,
+    pooTrophees,
+  }: {
+    socket: BattleSocket;
+    pooTrophees?: number;
+  }): Player {
     const alreadyExisting = this.get({ socketId: socket.id });
     if (alreadyExisting) return alreadyExisting;
-    const player = new Player(socket);
+    const player = new Player({ socket, pooTrophees });
     this.players.push(player);
     return player;
   }

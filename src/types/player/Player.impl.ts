@@ -5,17 +5,34 @@ import { BattleSocket } from "../socket/BattleSocket";
 import { UltiDetails } from "./UltiDetails";
 
 export class Player {
-  socket: BattleSocket;
+  socket?: BattleSocket;
   battleState?: BattleState;
+  createdAt: Date;
+  pooTrophees: number;
+  joiningDate?: Date;
 
-  constructor(socket: BattleSocket) {
+  constructor({
+    socket,
+    pooTrophees = 0,
+    joiningDate,
+  }: {
+    socket?: BattleSocket;
+    pooTrophees?: number;
+    joiningDate?: Date;
+  }) {
     this.socket = socket;
+    this.createdAt = new Date();
+    this.pooTrophees = pooTrophees;
+    this.joiningDate = joiningDate;
   }
 
   get socketId() {
-    return this.socket.id;
+    return this.socket!.id;
   }
 
+  /**
+   * Return true if the player has defined its battle state
+   */
   get ready() {
     return !!this.battleState;
   }
@@ -25,8 +42,10 @@ export class Player {
   }
 
   join(roomId: RoomId) {
-    this.socket.join(roomId);
-    this.socket.data.roomId = roomId;
+    if (this.socket) {
+      this.socket.join(roomId);
+      this.socket.data.roomId = roomId;
+    }
   }
 
   init(battleState: BattleState) {
