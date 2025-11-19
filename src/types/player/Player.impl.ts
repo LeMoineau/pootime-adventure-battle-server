@@ -41,6 +41,10 @@ export class Player {
     return this.battleState && this.battleState.currentState.currentPv <= 0;
   }
 
+  get level(): number | undefined {
+    return this.battleState?.stats.level;
+  }
+
   join(roomId: RoomId) {
     if (this.socket) {
       this.socket.join(roomId);

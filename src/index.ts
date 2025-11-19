@@ -3,7 +3,6 @@ import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import cors from "cors";
 import { createServer } from "http";
-import { SocketListener } from "./socket.listener";
 import { BattleSocketServer } from "./types/socket/BattleSocketServer";
 import battleManager from "./manager/battle.manager";
 import roomManager from "./manager/room.manager";

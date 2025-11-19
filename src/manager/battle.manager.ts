@@ -69,9 +69,11 @@ class BattleManager {
         battleService.generateBattleUpdatePayload(player, adv)
       );
     if (room.finished()) {
+      console.log("finished");
       const winner = room.getWinner();
       room.stop();
       if (winner) {
+        console.log("winner");
         this.io
           .to(room.id)
           .emit(

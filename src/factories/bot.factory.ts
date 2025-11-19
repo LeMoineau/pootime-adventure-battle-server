@@ -12,6 +12,7 @@ import { ArrayUtils } from "../utils/array-utils";
 import { MathUtils } from "../utils/math-utils";
 import { xpNeededForNextLevel } from "../config/constants/stats/level";
 import { ultis } from "../config/constants/stats/utlis";
+import { UltiDetails } from "../types/player/UltiDetails";
 
 class BotFactory {
   create({ player, room }: { player: Player; room: Room }): Bot {
@@ -24,8 +25,7 @@ class BotFactory {
   }
 
   generateBattleState(player: Player): BattleState {
-    const ultiName = this._generateUlti(player);
-    const stats = this._generateBotStats(player, ultiName);
+    const stats = this._generateBotStats(player);
     return {
       stats,
       style: this._generateBotStyle(),
@@ -38,21 +38,23 @@ class BotFactory {
 
   _generateHittingRate(): number {
     // Entre 5 hit par secondes et 15
-    return Math.round(1000 / MathUtils.getRandomInt(15, 5));
+    return Math.round(1000 / MathUtils.getRandomInt(12, 5));
   }
 
-  _generateUlti(player: Player): string {
+  /**
+   * choose an ulti from player level
+   * @param player adv of the bot
+   * @returns [ultiName, ultiDetails] or undefined
+   */
+  _generateUlti(player: Player): [string, UltiDetails] | undefined {
     const level = player.battleState!.stats.level;
-    const ulti = ArrayUtils.getRandomItem(
-      Object.entries(ultis)
+    const ulti = ArrayUtils.getRandomItem([
+      undefined,
+      ...Object.entries(ultis)
         .filter(([_, i]) => i.unlockLevel <= level)
-        .map(([k, _]) => k)
-    );
-    return ulti;
-  }
-
-  _getLevel(player: Player): number {
-    return player.battleState!.stats.level;
+        .map(([k, i]) => ({ ultiName: k, details: i.details })),
+    ]);
+    return ulti ? [ulti.ultiName, ulti.details] : undefined;
   }
 
   _generateBotStyle(): PlayerStyle {
@@ -64,40 +66,68 @@ class BotFactory {
     };
   }
 
-  _generateBotStats(player: Player, ultiName: string): PlayerStats {
-    const playerLevel = this._getLevel(player);
-    let starsRemaning = 0;
-    for (let i = 1; i < playerLevel; i++) {
-      starsRemaning += xpNeededForNextLevel(i);
-    }
-    starsRemaning += MathUtils.getRandomInt(
-      xpNeededForNextLevel(playerLevel + 1) - 1,
-      xpNeededForNextLevel(playerLevel)
-    );
-    const keys = ArrayUtils.shuffle([
-      "attaque",
-      "defense",
-      "mana",
-      "pv",
-      "recupMana",
-      "resMana",
-    ]);
+  _generateBotStats(player: Player): PlayerStats {
+    const ulti = this._generateUlti(player);
+    let starsRemaining = this._calculateStarsToSpend(player.level!);
+    const stats = this._divideStarsAmongStats({
+      starsAvailable: starsRemaining,
+      ...(ulti ? { ultiName: ulti[0], ultiDetails: ulti[1] } : {}),
+    });
+    return {
+      ...stats,
+      level: player.level!,
+      ultiSelected: ulti ? ulti[0] : null,
+    };
+  }
+
+  _divideStarsAmongStats({
+    starsAvailable,
+    ultiName,
+    ultiDetails,
+  }: {
+    starsAvailable: number;
+    ultiName?: string;
+    ultiDetails?: UltiDetails;
+  }): Omit<PlayerStats, "level" | "ultiSelected"> {
+    let starsRemaining = starsAvailable;
+    const keys = ArrayUtils.shuffle(["attaque", "defense", "pv", "resMana"]);
     let stats: any = {};
-    for (let k of keys) {
-      const starsSpend = MathUtils.getRandomInt(starsRemaning);
-      stats[k] = starsSpend;
-      starsRemaning -= starsSpend;
+    if (ultiName && ultiDetails) {
+      stats.mana = ultiDetails.mana / 5;
+      stats.recupMana = 1;
+      keys.push("recupMana");
+      starsRemaining -= ultiDetails.mana / 5 - 1;
+    } else {
+      stats.mana = 0;
+      stats.recupMana = 0;
+    }
+    for (let i = 0; i < keys.length; i++) {
+      const starsSpend =
+        i === keys.length - 1
+          ? starsRemaining
+          : MathUtils.getRandomInt(starsRemaining);
+      stats[keys[i]] = (stats[keys[i]] ?? 0) + starsSpend;
+      starsRemaining -= starsSpend;
     }
     return {
       attaque: stats.attaque + 1,
       defense: stats.defense + 1,
-      level: playerLevel,
       mana: stats.mana * 5,
       pv: stats.pv * 5 + 20,
       recupMana: stats.recupMana,
       resMana: stats.resMana,
-      ultiSelected: ultiName,
     };
+  }
+
+  _calculateStarsToSpend(playerLevel: number): number {
+    let starsRemaining = 0;
+    for (let i = 1; i < playerLevel!; i++) {
+      starsRemaining += xpNeededForNextLevel(i);
+    }
+    starsRemaining += MathUtils.getRandomInt(
+      xpNeededForNextLevel(playerLevel!) - 1
+    );
+    return starsRemaining;
   }
 }
 

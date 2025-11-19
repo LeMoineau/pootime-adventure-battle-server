@@ -2,65 +2,39 @@ import { BattleUpdatePayload } from "../types/battle/BattleUpdatePayload";
 import { BattleEnding, BattleRewards } from "../types/battle/BattleEnding";
 import { Player } from "../types/player/Player.impl";
 import { UltiDetails } from "../types/player/UltiDetails";
-import { MathUtils } from "../utils/math-utils";
 import { Room } from "../types/room/Room.impl";
+import rewardFactory from "../factories/reward.factory";
 
 class BattleService {
-  constructor() {}
-
   calculateDamage(hitter: Player, victim: Player): number {
     if (!hitter.battleState || !victim.battleState) return 0;
-    return (
-      hitter.battleState.stats.attaque /
-      (victim.battleState.stats.defense === 0
-        ? 1
-        : victim.battleState.stats.defense)
-    );
+    const hitterAttaque = hitter.battleState.stats.attaque;
+    const victimDefense = victim.battleState.stats.defense;
+    return hitterAttaque / (victimDefense === 0 ? 1 : victimDefense);
   }
 
   calculateSpellDamage(_: Player, victim: Player, ulti: UltiDetails): number {
-    return ulti.damage
-      ? ulti.damage /
-          (victim.battleState?.currentState.resMana === 0
-            ? 1
-            : victim.battleState?.currentState.resMana)
-      : 0;
+    const ultiDamage = ulti.damage;
+    if (!ultiDamage) return 0;
+    const victimResMana = victim.battleState?.currentState.resMana;
+    return ultiDamage / (victimResMana === 0 ? 1 : victimResMana);
   }
 
   generateBattleUpdatePayload(
     hitter: Player,
     victim: Player
   ): BattleUpdatePayload {
+    const currentPv = victim.battleState?.currentState.currentPv;
+    const currentMana = hitter.battleState?.currentState.currentMana;
     return [
       {
         target: victim.socketId,
-        update: {
-          currentPv: victim.battleState?.currentState.currentPv,
-        },
+        update: { currentPv },
       },
       {
         target: hitter.socketId,
-        update: {
-          currentMana: hitter.battleState?.currentState.currentMana,
-        },
+        update: { currentMana },
       },
-    ];
-  }
-
-  generateBattleReward(
-    room: Room,
-    winner: Player,
-    looser: Player
-  ): [BattleRewards, BattleRewards] {
-    return [
-      MathUtils.calculateRewardsWinner(
-        winner.battleState!.stats,
-        looser.battleState!.stats
-      ),
-      MathUtils.calculateRewardsLoser(
-        winner.battleState!.stats,
-        looser.battleState!.stats
-      ),
     ];
   }
 
@@ -69,11 +43,11 @@ class BattleService {
     if (!winner) throw new Error(`no winner in room #${room.id}`);
     const looser = room.getAdvOf({ socketId: winner.socketId });
     if (!looser) throw new Error(`no adv of the winner in room #${room.id}`);
-    const [winReward, loseReward] = this.generateBattleReward(
-      room,
+    const [winReward, loseReward] = rewardFactory.create({
       winner,
-      looser
-    );
+      looser,
+      room,
+    });
     return {
       [winner.socketId]: {
         victoryState: "winner",
