@@ -1,8 +1,8 @@
-import battleService from "../../service/battle.service";
-import { BattleState } from "../battle/BattleState";
-import { RoomId } from "../Identifier";
-import { BattleSocket } from "../socket/BattleSocket";
-import { UltiDetails } from "./UltiDetails";
+import battleService from "../service/battle.service";
+import { BattleState } from "../types/battle/BattleState";
+import { RoomId } from "../types/Identifier";
+import { BattleSocket } from "../types/socket/BattleSocket";
+import { UltiDetails } from "../types/player/UltiDetails";
 
 export class Player {
   socket?: BattleSocket;

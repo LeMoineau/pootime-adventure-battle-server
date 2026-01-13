@@ -2,12 +2,12 @@ import { DefaultValues } from "../config/DefaultValues";
 import battleService from "../service/battle.service";
 import { BattleState } from "../types/battle/BattleState";
 import { RoomId, SocketId } from "../types/Identifier";
-import { Player } from "../types/player/Player.impl";
+import { Player } from "../models/Player";
 import { UltiDetails } from "../types/player/UltiDetails";
-import { Room } from "../types/room/Room.impl";
+import { Room } from "../models/Room";
 import { BattleSocketServer } from "../types/socket/BattleSocketServer";
 import roomController from "../controller/room.controller";
-import { Bot } from "../types/player/Bot.impl";
+import { Bot } from "../models/Bot";
 
 class BattleManager {
   io!: BattleSocketServer;

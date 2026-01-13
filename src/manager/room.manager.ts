@@ -2,7 +2,7 @@ import playerController from "../controller/player.controller";
 import roomController from "../controller/room.controller";
 import { QueueService } from "../service/queue.service";
 import { RoomId, SocketId } from "../types/Identifier";
-import { Room } from "../types/room/Room.impl";
+import { Room } from "../models/Room";
 import { BattleSocket } from "../types/socket/BattleSocket";
 import { BattleSocketServer } from "../types/socket/BattleSocketServer";
 import battleManager from "./battle.manager";

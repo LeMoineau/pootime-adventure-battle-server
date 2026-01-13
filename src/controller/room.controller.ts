@@ -1,6 +1,6 @@
 import { RoomId, SocketId } from "../types/Identifier";
-import { Player } from "../types/player/Player.impl";
-import { Room } from "../types/room/Room.impl";
+import { Player } from "../models/Player";
+import { Room } from "../models/Room";
 import { MathUtils } from "../utils/math-utils";
 import playerController from "./player.controller";
 

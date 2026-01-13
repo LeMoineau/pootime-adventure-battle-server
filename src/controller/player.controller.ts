@@ -1,5 +1,5 @@
 import { SocketId } from "../types/Identifier";
-import { Player } from "../types/player/Player.impl";
+import { Player } from "../models/Player";
 import { BattleSocket } from "../types/socket/BattleSocket";
 
 class PlayerController {

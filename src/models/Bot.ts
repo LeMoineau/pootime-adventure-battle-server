@@ -1,11 +1,11 @@
-import { RoomId } from "../Identifier";
-import { Room } from "../room/Room.impl";
-import { Player } from "./Player.impl";
+import { RoomId } from "../types/Identifier";
+import { Room } from "./Room";
 import { v4 as uuidv4 } from "uuid";
-import { UltiDetails } from "./UltiDetails";
-import battleManager from "../../manager/battle.manager";
-import botFactory from "../../factories/bot.factory";
-import { ultis } from "../../config/constants/stats/utlis";
+import { UltiDetails } from "../types/player/UltiDetails";
+import battleManager from "../manager/battle.manager";
+import botFactory from "../factories/bot.factory";
+import { ultis } from "../config/constants/stats/utlis";
+import { Player } from "./Player";
 
 export class Bot extends Player {
   botId: string;

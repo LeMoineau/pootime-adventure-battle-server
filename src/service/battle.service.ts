@@ -1,8 +1,8 @@
 import { BattleUpdatePayload } from "../types/battle/BattleUpdatePayload";
-import { BattleEnding, BattleRewards } from "../types/battle/BattleEnding";
-import { Player } from "../types/player/Player.impl";
+import { BattleEnding } from "../types/battle/BattleEnding";
+import { Player } from "../models/Player";
 import { UltiDetails } from "../types/player/UltiDetails";
-import { Room } from "../types/room/Room.impl";
+import { Room } from "../models/Room";
 import rewardFactory from "../factories/reward.factory";
 
 class BattleService {

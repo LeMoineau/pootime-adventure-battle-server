@@ -1,5 +1,5 @@
 import { describe, expect, jest, test } from "@jest/globals";
-import { Player } from "../types/player/Player.impl";
+import { Player } from "../models/Player";
 import MockedSocket from "socket.io-mock";
 import { QueueService } from "./queue.service";
 import { BattleSocketServer } from "../types/socket/BattleSocketServer";

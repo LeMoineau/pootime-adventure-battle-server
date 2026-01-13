@@ -2,9 +2,7 @@ import { DefaultValues } from "../config/DefaultValues";
 import roomController from "../controller/room.controller";
 import botFactory from "../factories/bot.factory";
 import { SocketId } from "../types/Identifier";
-import { Bot } from "../types/player/Bot.impl";
-import { Player } from "../types/player/Player.impl";
-import { Room } from "../types/room/Room.impl";
+import { Player } from "../models/Player";
 import { BattleSocketServer } from "../types/socket/BattleSocketServer";
 
 export class QueueService {
@@ -128,15 +126,6 @@ export class QueueService {
       this.queue.push(player);
       console.log(`#${player.socketId} join the queue`);
     }
-    // if (this.queue.length >= 1) {
-    //   const adv = this.remove({ index: 0 })!;
-    //   const room = roomController.create({ owner: player, ranked: true });
-    //   room.add(adv);
-    //   onRoomCreated(room);
-    // } else {
-    //   this.queue.push(player);
-    //   console.log(`#${player.socketId} join the queue`);
-    // }
   }
 
   /**

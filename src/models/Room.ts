@@ -1,8 +1,8 @@
-import { BattleState } from "../battle/BattleState";
-import { RoomDTO } from "./Room.dto";
-import { RoomId, SocketId } from "../Identifier";
-import { Player } from "../player/Player.impl";
-import { Bot } from "../player/Bot.impl";
+import { BattleState } from "../types/battle/BattleState";
+import { RoomDTO } from "../types/room/Room.dto";
+import { RoomId, SocketId } from "../types/Identifier";
+import { Player } from "./Player";
+import { Bot } from "./Bot";
 
 export class Room {
   id: RoomId;
