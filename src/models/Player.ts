@@ -10,6 +10,7 @@ export class Player {
   createdAt: Date;
   pooTrophees: number;
   joiningDate?: Date;
+  rage?: number;
 
   constructor({
     socket,
@@ -38,6 +39,11 @@ export class Player {
   }
 
   get died() {
+    console.log(
+      "died?",
+      this.battleState,
+      this.battleState && this.battleState.currentState.currentPv <= 0
+    );
     return this.battleState && this.battleState.currentState.currentPv <= 0;
   }
 
@@ -56,16 +62,28 @@ export class Player {
     this.battleState = battleState;
   }
 
-  hit(adv: Player) {
-    if (!this.battleState) return;
-    const damage = battleService.calculateDamage(this, adv);
-    adv.losePv(damage);
-    this.gainMana(this.battleState.stats.recupMana);
-  }
-
   losePv(pvLost: number) {
     if (!this.battleState) return;
     this.battleState.currentState.currentPv -= pvLost;
+  }
+
+  receiveAttaque(attaque: number) {
+    if (!this.battleState) return;
+    const defense = this.battleState.stats.defense;
+    this.battleState.currentState.currentPv -=
+      attaque / (defense === 0 ? 1 : defense);
+  }
+
+  receiveSpell(spell: UltiDetails) {
+    if (!this.battleState) return;
+    if (spell.rage) {
+      this.rage = spell.rage;
+    }
+    if (spell.damage) {
+      const resMana = this.battleState.stats.resMana;
+      this.battleState.currentState.currentPv -=
+        spell.damage / (resMana === 0 ? 1 : resMana);
+    }
   }
 
   gainMana(manaGained: number) {
@@ -91,10 +109,20 @@ export class Player {
     return this.battleState.currentState.currentMana >= ulti.mana;
   }
 
-  spell(adv: Player, ulti: UltiDetails) {
+  hit(adv: Player) {
     if (!this.battleState) return;
-    const damage = battleService.calculateSpellDamage(this, adv, ulti);
-    adv.losePv(damage);
+    let multiplier = 1;
+    if (this.rage && this.rage > 0) {
+      multiplier += 1;
+      this.rage -= 1;
+      if (this.rage <= 0) this.rage = undefined;
+    }
+    adv.receiveAttaque(this.battleState.stats.attaque * multiplier);
+    this.gainMana(this.battleState.stats.recupMana);
+  }
+
+  spell(adv: Player, ulti: UltiDetails) {
+    adv.receiveSpell(ulti);
     this.loseMana(ulti.mana);
   }
 }

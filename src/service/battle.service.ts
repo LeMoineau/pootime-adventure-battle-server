@@ -1,25 +1,10 @@
 import { BattleUpdatePayload } from "../types/battle/BattleUpdatePayload";
 import { BattleEnding } from "../types/battle/BattleEnding";
 import { Player } from "../models/Player";
-import { UltiDetails } from "../types/player/UltiDetails";
 import { Room } from "../models/Room";
 import rewardFactory from "../factories/reward.factory";
 
 class BattleService {
-  calculateDamage(hitter: Player, victim: Player): number {
-    if (!hitter.battleState || !victim.battleState) return 0;
-    const hitterAttaque = hitter.battleState.stats.attaque;
-    const victimDefense = victim.battleState.stats.defense;
-    return hitterAttaque / (victimDefense === 0 ? 1 : victimDefense);
-  }
-
-  calculateSpellDamage(_: Player, victim: Player, ulti: UltiDetails): number {
-    const ultiDamage = ulti.damage;
-    if (!ultiDamage) return 0;
-    const victimResMana = victim.battleState?.currentState.resMana;
-    return ultiDamage / (victimResMana === 0 ? 1 : victimResMana);
-  }
-
   generateBattleUpdatePayload(
     hitter: Player,
     victim: Player
