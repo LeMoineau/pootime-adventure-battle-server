@@ -14,6 +14,9 @@ import { xpNeededForNextLevel } from "../config/constants/stats/level";
 import { ultis } from "../config/constants/stats/utlis";
 import { UltiDetails } from "../types/player/UltiDetails";
 
+const MAX_HIT_PER_SECOND = 12;
+const MIN_HIT_PER_SECOND = 5;
+
 class BotFactory {
   create({ player, room }: { player: Player; room: Room }): Bot {
     const bot = new Bot({
@@ -36,9 +39,13 @@ class BotFactory {
     };
   }
 
+  /**
+   * Genere le nombre de hit par seconde (par défaut entre 12 et 5)
+   */
   _generateHittingRate(): number {
-    // Entre 5 hit par secondes et 15
-    return Math.round(1000 / MathUtils.getRandomInt(12, 5));
+    return Math.round(
+      1000 / MathUtils.getRandomInt(MAX_HIT_PER_SECOND, MIN_HIT_PER_SECOND),
+    );
   }
 
   /**
@@ -125,7 +132,7 @@ class BotFactory {
       starsRemaining += xpNeededForNextLevel(i);
     }
     starsRemaining += MathUtils.getRandomInt(
-      xpNeededForNextLevel(playerLevel!) - 1
+      xpNeededForNextLevel(playerLevel!) - 1,
     );
     return starsRemaining;
   }
