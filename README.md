@@ -1,10 +1,27 @@
 # PooTime Adventure Battle server
 
-## Push new vesion to production
+Serveur socket.io de combat pour PooTime Adventure hébergé sur https://render.com
 
-```bash
+## Installation
+
+```
+npm i
+npm run dev
+```
+
+## Déployer une nouvelle version
+
+Déploie automatiquement sur render après nouveaux commit dans le dossier `dist/`
+
+```
 npm run build
-npm run add-build
-#npm run start #si veut tester avant d'envoyer
+#git ...
 git push
+```
+
+Pour tester le build de la nouvelle version
+
+```
+npm run build
+npm run start
 ```
